@@ -26,8 +26,8 @@ def get_tides(db: Session, lat: float, lon: float) -> List[models.TidePrediction
     params = {
         "latitude": lat,
         "longitude": lon,
-        "hourly": "sea_level_height_msl",  # Correct parameter for tides
-        "timezone": "GMT",
+        "hourly": "sea_level_height_msl",
+        "timezone": "auto",
         "forecast_days": 1
     }
     
@@ -48,10 +48,16 @@ def get_tides(db: Session, lat: float, lon: float) -> List[models.TidePrediction
             # Open-Meteo returns ISO strings like "2024-01-01T00:00"
             timestamp = datetime.fromisoformat(time_str)
             
+            # Applying estimated Offset for Sydney LAT (Chart Datum) vs MSL
+            if height is not None:
+                calibrated_height = height + 0.8
+            else:
+                calibrated_height = 0.0 # Fallback should not happen often
+            
             prediction = models.TidePrediction(
                 station_id=station_id,
                 timestamp=timestamp,
-                height_m=height,
+                height_m=calibrated_height,
                 source="Open-Meteo"
             )
             db.add(prediction)
