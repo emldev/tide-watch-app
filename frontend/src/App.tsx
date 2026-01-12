@@ -17,11 +17,14 @@ function App() {
   const [coords, setCoords] = useState({ lat: -33.8, lon: 151.2 });
   const [isOffline, setIsOffline] = useState<boolean>(false);
 
+  // Use the Vercel (or Vite) Environment Variable, or fallback to localhost
+  const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
   useEffect(() => {
     const fetchTides = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/tides?lat=${coords.lat}&lon=${coords.lon}`);
+        const response = await axios.get(`${API_URL}/tides?lat=${coords.lat}&lon=${coords.lon}`);
         setTideData(response.data.data);
 
         // Save to cache on success
